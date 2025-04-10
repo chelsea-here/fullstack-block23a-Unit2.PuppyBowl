@@ -1,13 +1,10 @@
-//If you would like to, you can create a variable to store the API_URL here.
-//This is optional. if you do not want to, skip this and move on.
+const api =
+  "https://fsa-puppy-bowl.herokuapp.com/api/2501-FTB-ET-WEB-AM/players";
 
+let puppies = [];
 
-/////////////////////////////
-/*This looks like a good place to declare any state or global variables you might need*/
-
-////////////////////////////
-
-
+const allPlayersDiv = document.querySelector(".allPlayersDiv");
+const singlePlayerDiv = document.querySelector(".singlePlayerDiv");
 
 /**
  * Fetches all players from the API.
@@ -15,8 +12,10 @@
  * @returns {Object[]} the array of player objects
  */
 const fetchAllPlayers = async () => {
-  //TODO
-
+  const response = await fetch(`${api}`);
+  const data = await response.json();
+  //console.log(data.data.players);
+  return data.data.players;
 };
 
 /**
@@ -25,8 +24,12 @@ const fetchAllPlayers = async () => {
  * @param {number} playerId
  * @returns {Object} the player object
  */
+
 const fetchSinglePlayer = async (playerId) => {
-  //TODO
+  const playerData = await fetch(`${api}/${playerId}`);
+  const singlePlayerData = await playerData.json();
+  console.log(singlePlayerData);
+  renderSinglePlayer(singlePlayerData); //THIS IS TAKEN FROM POKE EXAMPLE to do: CHECK IF IT IS NECESSARY
 };
 
 /**
@@ -36,8 +39,8 @@ const fetchSinglePlayer = async (playerId) => {
  * @param {Object} newPlayer the player to add
  */
 /* Note: we need data from our user to be able to add a new player
- * Do we have a way to do that currently...? 
-*/
+ * Do we have a way to do that currently...?
+ */
 /**
  * Note#2: addNewPlayer() expects you to pass in a
  * new player object when you call it. How can we
@@ -68,7 +71,6 @@ const addNewPlayer = async (newPlayer) => {
 
 const removePlayer = async (playerId) => {
   //TODO
-
 };
 
 /**
@@ -84,15 +86,46 @@ const removePlayer = async (playerId) => {
  * Additionally, for each player we should be able to:
  * - See details of a single player. When clicked, should be redirected
  *    to a page with the appropriate hashroute. The page should show
- *    specific details about the player clicked 
+ *    specific details about the player clicked
  * - Remove from roster. when clicked, should remove the player
  *    from the database and our current view without having to refresh
  *
  */
 const render = () => {
-  // TODO
+  if (puppies.length > 0) {
+    const html = puppies.map((puppy, idx) => {
+      return `
+    <a href=#${puppy.id}>
+        <h3>${puppy.name}</h3>
+        <p>${puppy.id}</p>
+        <img src=${puppy.imageUrl} alt=${puppy.name}/>
+        </a>
+        </br>
+        <button class="deleteButton" id=${puppy.id} data-puppyIdx=${idx}>Delete</button>
+    
+`;
+    });
+    const id = window.location.hash.slice(1);
+    console.log(id);
 
-  
+    const singlePlayer = puppies.find((puppy) => {
+      return puppy.id === id;
+    });
+    console.log(singlePlayer);
+
+    allPlayersDiv.innerHTML = singlePlayer
+      ? fetchSinglePlayer(singlePlayer)
+      : `<div id="playerContainer">${html.join("")}</div>`;
+  } else {
+    const noPlayers = () => {
+      return `
+      <h2>
+        Oops... there are no players in your roster. Please add a new player.
+      </h2>
+      `;
+    };
+    allPlayersDiv.innerHTML = noPlayers.join("");
+  }
 };
 
 /**
@@ -110,20 +143,32 @@ const render = () => {
  * @param {Object} player an object representing a single player
  */
 const renderSinglePlayer = (player) => {
-  // TODO
-
+  const playerTeam = () => {
+    `${player.teamId} ? ${player.teamId} : "Unassigned"`;
+  };
+  console.log(playerTeam);
+  //BELOW I AM FOLLOWING THE POKEMON EXAMPLE, BUT IT DOES SEEM ODD TO UPDATE THE ALL PLAYERS DIV, RATHER THAN THE SINGLE PLAYERS DIV
+  allPlayersDiv.innerHTML = `
+    <h2>Selected Puppy Player</h2>
+    <h2>${player.name}</h2>
+    <p>${player.id}</p>
+    <p>${player.breed}</p>
+    <img src=${player.imageUrl} alt=${player.name}/>
+    <h3>${playerTeam}</h3>
+  </div>
+  <a href=#>Back to all Players</a>`;
 };
-
 
 /**
  * Initializes the app by calling render
  * HOWEVER....
  */
+
 const init = async () => {
+  const allPlayers = await fetchAllPlayers();
+  puppies = allPlayers;
   //Before we render, what do we always need...?
-
   render();
-
 };
 
 /**THERE IS NO NEED TO EDIT THE CODE BELOW =) **/
