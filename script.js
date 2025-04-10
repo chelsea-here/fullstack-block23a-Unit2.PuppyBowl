@@ -26,10 +26,11 @@ const fetchAllPlayers = async () => {
  */
 
 const fetchSinglePlayer = async (playerId) => {
+  console.log(playerId);
   const playerData = await fetch(`${api}/${playerId}`);
   const singlePlayerData = await playerData.json();
   console.log(singlePlayerData);
-  renderSinglePlayer(singlePlayerData); //THIS IS TAKEN FROM POKE EXAMPLE to do: CHECK IF IT IS NECESSARY
+  renderSinglePlayer(singlePlayerData.data.player); //THIS IS TAKEN FROM POKE EXAMPLE to do: CHECK IF IT IS NECESSARY
 };
 
 /**
@@ -105,16 +106,16 @@ const render = () => {
     
 `;
     });
-    const id = window.location.hash.slice(1);
-    console.log(id);
+    const id = window.location.hash.slice(1) * 1;
+    //console.log(typeof id);
 
     const singlePlayer = puppies.find((puppy) => {
       return puppy.id === id;
     });
-    console.log(singlePlayer);
+    //console.log(singlePlayer);
 
     allPlayersDiv.innerHTML = singlePlayer
-      ? fetchSinglePlayer(singlePlayer)
+      ? fetchSinglePlayer(id)
       : `<div id="playerContainer">${html.join("")}</div>`;
   } else {
     const noPlayers = () => {
@@ -143,9 +144,7 @@ const render = () => {
  * @param {Object} player an object representing a single player
  */
 const renderSinglePlayer = (player) => {
-  const playerTeam = () => {
-    `${player.teamId} ? ${player.teamId} : "Unassigned"`;
-  };
+  const playerTeam = player.teamId ? player.teamId : "Unassigned";
   console.log(playerTeam);
   //BELOW I AM FOLLOWING THE POKEMON EXAMPLE, BUT IT DOES SEEM ODD TO UPDATE THE ALL PLAYERS DIV, RATHER THAN THE SINGLE PLAYERS DIV
   allPlayersDiv.innerHTML = `
