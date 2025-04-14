@@ -11,10 +11,44 @@
   <body>
     <h1>Welcome to Puppy Bowl!</h1>
     <div>
-      <h2>All of our Puppy Players:</h2>
       <div class="allPlayersDiv"></div>
     </div>
     <div class="singlePlayerDiv"></div>
+    <hr />
+    <form id="newPlayerForm">
+      <h3>Add a new player:</h3>
+      <div><label>Name</label> <input type="text" name="name" required /></div>
+      <div>
+        <label>Breed</label> <input type="text" name="breed" required />
+      </div>
+      <div>
+        <label for="status-select">Status</label>
+        <select type="text" name="status" id="status-select">
+          <option value="bench">Bench</option>
+          <option value="field">Field</option>
+        </select>
+      </div>
+      <div>
+        <label for="url">Enter an image URL</label>
+        <input
+          type="url"
+          name="imageUrl"
+          id="url"
+          placeholder="https://example.com"
+          pattern="https://.*"
+          size="30"
+        />
+      </div>
+      <div>
+        <label for="team-select">Team</label>
+        <select type="text" name="teamId" id="team-select">
+          <option value="5328">Ruff (5328)</option>
+          <option value="3396">Scruff (3396)</option>
+          <option value="null">N/A</option>
+        </select>
+      </div>
+      <button type="submit">Create</button>
+    </form>
     <!--Don't be afraid to add stuff to your HTML as needed!-->
   </body>
 </html>

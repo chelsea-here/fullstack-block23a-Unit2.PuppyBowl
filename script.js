@@ -6,6 +6,10 @@ let puppies = [];
 const allPlayersDiv = document.querySelector(".allPlayersDiv");
 const singlePlayerDiv = document.querySelector(".singlePlayerDiv");
 
+window.addEventListener("hashchange", () => {
+  render();
+});
+
 /**
  * Fetches all players from the API.
  * This function should not be doing any rendering
@@ -14,7 +18,7 @@ const singlePlayerDiv = document.querySelector(".singlePlayerDiv");
 const fetchAllPlayers = async () => {
   const response = await fetch(`${api}`);
   const data = await response.json();
-  //console.log(data.data.players);
+  console.log(data.data.players);
   return data.data.players;
 };
 
@@ -33,6 +37,31 @@ const fetchSinglePlayer = async (playerId) => {
   renderSinglePlayer(singlePlayerData.data.player); //THIS IS TAKEN FROM POKE EXAMPLE to do: CHECK IF IT IS NECESSARY
 };
 
+newPlayerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const newPlayer = {
+    name: event.target.name.value,
+    breed: event.target.breed.value,
+    status: event.target.status.value,
+    imageUrl: event.target.imageUrl.value,
+    teamId: Number(event.target.teamId.value),
+  };
+  try {
+    const response = await fetch(`${api}`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(newPlayer),
+    });
+    const data = await response.json();
+    console.log(data);
+    puppies.push(data.data.newPlayer);
+  } catch {
+    console.error(error);
+  }
+});
 /**
  * Adds a new player to the roster via the API.
  * Once a player is added to the database, the new player
@@ -52,9 +81,9 @@ const fetchSinglePlayer = async (playerId) => {
  * @returns {Object} the new player object added to database
  */
 
-const addNewPlayer = async (newPlayer) => {
-  //TODO
-};
+//const addNewPlayer = async (newPlayer) => {
+//TODO
+//};
 
 /**
  * Removes a player from the roster via the API.
@@ -74,6 +103,19 @@ const removePlayer = async (playerId) => {
   //TODO
 };
 
+allPlayersDiv.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("deleteButton")) {
+    const id = e.target.id;
+    try {
+      const response = await fetch(`${api}/${id}`, {
+        method: "DELETE",
+      });
+      e.target.parentElement.remove();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+});
 /**
  * Updates html to display a list of all players or a single player page.
  *
@@ -94,20 +136,23 @@ const removePlayer = async (playerId) => {
  */
 const render = () => {
   if (puppies.length > 0) {
-    const html = puppies.map((puppy, idx) => {
+    const puppiesHtml = puppies.map((puppy, idx) => {
       return `
-    <a href=#${puppy.id}>
+    <div class="playersDiv">
+      <a href=#${puppy.id}>
         <h3>${puppy.name}</h3>
         <p>${puppy.id}</p>
         <img src=${puppy.imageUrl} alt=${puppy.name}/>
-        </a>
-        </br>
-        <button class="deleteButton" id=${puppy.id} data-puppyIdx=${idx}>Delete</button>
-    
+      </a>
+      </br>
+      <button class="deleteButton" id=${puppy.id} data-puppyIdx=${idx}>Delete</button>
+      </div>
+
 `;
     });
-    const id = window.location.hash.slice(1) * 1;
+    const id = parseInt(window.location.hash.slice(1)); //converted from a string to a number
     //console.log(typeof id);
+    console.log(id);
 
     const singlePlayer = puppies.find((puppy) => {
       return puppy.id === id;
@@ -116,7 +161,9 @@ const render = () => {
 
     allPlayersDiv.innerHTML = singlePlayer
       ? fetchSinglePlayer(id)
-      : `<div id="playerContainer">${html.join("")}</div>`;
+      : `<h2>All of our Puppy Players:</h2><div id="playerContainer">${puppiesHtml.join(
+          ""
+        )}</div>`;
   } else {
     const noPlayers = () => {
       return `
