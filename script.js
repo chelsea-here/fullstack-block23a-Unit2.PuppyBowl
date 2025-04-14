@@ -37,31 +37,6 @@ const fetchSinglePlayer = async (playerId) => {
   renderSinglePlayer(singlePlayerData.data.player); //THIS IS TAKEN FROM POKE EXAMPLE to do: CHECK IF IT IS NECESSARY
 };
 
-newPlayerForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const newPlayer = {
-    name: event.target.name.value,
-    breed: event.target.breed.value,
-    status: event.target.status.value,
-    imageUrl: event.target.imageUrl.value,
-    teamId: Number(event.target.teamId.value),
-  };
-  try {
-    const response = await fetch(`${api}`, {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(newPlayer),
-    });
-    const data = await response.json();
-    console.log(data);
-    puppies.push(data.data.newPlayer);
-  } catch {
-    console.error(error);
-  }
-});
 /**
  * Adds a new player to the roster via the API.
  * Once a player is added to the database, the new player
@@ -81,9 +56,36 @@ newPlayerForm.addEventListener("submit", async (event) => {
  * @returns {Object} the new player object added to database
  */
 
-//const addNewPlayer = async (newPlayer) => {
-//TODO
-//};
+const addNewPlayer = async (newPlayer) => {
+  try {
+    const response = await fetch(`${api}`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(newPlayer),
+    });
+    const data = await response.json();
+    console.log(data);
+    puppies.push(data.data.newPlayer);
+    render();
+  } catch {
+    console.error(error);
+  }
+};
+
+newPlayerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const newPlayer = {
+    name: event.target.name.value,
+    breed: event.target.breed.value,
+    status: event.target.status.value,
+    imageUrl: event.target.imageUrl.value,
+    teamId: Number(event.target.teamId.value),
+  };
+  await addNewPlayer(newPlayer);
+});
 
 /**
  * Removes a player from the roster via the API.
@@ -100,20 +102,20 @@ newPlayerForm.addEventListener("submit", async (event) => {
  */
 
 const removePlayer = async (playerId) => {
-  //TODO
+  try {
+    const response = await fetch(`${api}/${playerId}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 allPlayersDiv.addEventListener("click", async (e) => {
   if (e.target.classList.contains("deleteButton")) {
-    const id = e.target.id;
-    try {
-      const response = await fetch(`${api}/${id}`, {
-        method: "DELETE",
-      });
-      e.target.parentElement.remove();
-    } catch (error) {
-      console.error(error);
-    }
+    const playerId = e.target.id;
+    await removePlayer(playerId);
+    e.target.parentElement.remove();
   }
 });
 /**
@@ -161,7 +163,7 @@ const render = () => {
 
     allPlayersDiv.innerHTML = singlePlayer
       ? fetchSinglePlayer(id)
-      : `<h2>All of our Puppy Players:</h2><div id="playerContainer">${puppiesHtml.join(
+      : `<h2>All of our Puppy Players:</h2><br /><div id="playerContainer">${puppiesHtml.join(
           ""
         )}</div>`;
   } else {
@@ -196,11 +198,12 @@ const renderSinglePlayer = (player) => {
   //BELOW I AM FOLLOWING THE POKEMON EXAMPLE, BUT IT DOES SEEM ODD TO UPDATE THE ALL PLAYERS DIV, RATHER THAN THE SINGLE PLAYERS DIV
   allPlayersDiv.innerHTML = `
     <h2>Selected Puppy Player</h2>
+    <br />
     <h2>${player.name}</h2>
-    <p>${player.id}</p>
+    <p>Player ID:${player.id}</p>
     <p>${player.breed}</p>
     <img src=${player.imageUrl} alt=${player.name}/>
-    <h3>${playerTeam}</h3>
+    <h3>Team ID: ${playerTeam}</h3>
   </div>
   <a href=#>Back to all Players</a>`;
 };
